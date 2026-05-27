@@ -690,26 +690,58 @@ function loop(ts) {
   drawNext();
 }
 
-canvas.addEventListener('mousemove', e => {
+function updateAimFromClient(clientX, clientY, sourceEl) {
   if (!gameActive) return;
-  const rect = canvas.getBoundingClientRect();
-  const dx = (e.clientX - rect.left) - shooterX;
-  const dy = (e.clientY - rect.top) - CANVAS_H;
-  let angle = Math.atan2(dy, dx);
-  aimAngle = Math.max(-Math.PI + 0.08, Math.min(-0.08, angle));
-});
+  const rect = sourceEl.getBoundingClientRect();
+  let dx, dy;
+  if (sourceEl === canvas) {
+    dx = (clientX - rect.left) - shooterX;
+    dy = (clientY - rect.top) - CANVAS_H;
+  } else {
+    dx = (clientX - rect.left) - shooterX;
+    dy = (clientY - rect.top) - 75;
+  }
+  aimAngle = Math.max(-Math.PI + 0.08, Math.min(-0.08, Math.atan2(dy, dx)));
+}
 
-shooterCanvas.addEventListener('mousemove', e => {
-  if (!gameActive) return;
-  const rect = shooterCanvas.getBoundingClientRect();
-  const dx = (e.clientX - rect.left) - shooterX;
-  const dy = (e.clientY - rect.top) - 75;
-  let angle = Math.atan2(dy, dx);
-  aimAngle = Math.max(-Math.PI + 0.08, Math.min(-0.08, angle));
-});
+canvas.addEventListener('mousemove', e => updateAimFromClient(e.clientX, e.clientY, canvas));
+shooterCanvas.addEventListener('mousemove', e => updateAimFromClient(e.clientX, e.clientY, shooterCanvas));
 
 canvas.addEventListener('click', shoot);
 shooterCanvas.addEventListener('click', shoot);
+
+// Touch support for iOS / mobile
+let touchMoved = false;
+
+function onTouchMove(e) {
+  e.preventDefault();
+  touchMoved = true;
+  const t = e.touches[0];
+  updateAimFromClient(t.clientX, t.clientY, e.currentTarget);
+}
+
+function onTouchEnd(e) {
+  e.preventDefault();
+  if (!touchMoved) {
+    // Short tap with no drag = shoot
+    shoot();
+  }
+  touchMoved = false;
+}
+
+function onTouchStart(e) {
+  e.preventDefault();
+  touchMoved = false;
+  // Update aim immediately on touch-down so a tap also aims before shooting
+  const t = e.touches[0];
+  updateAimFromClient(t.clientX, t.clientY, e.currentTarget);
+}
+
+for (const el of [canvas, shooterCanvas]) {
+  el.addEventListener('touchstart',  onTouchStart, { passive: false });
+  el.addEventListener('touchmove',   onTouchMove,  { passive: false });
+  el.addEventListener('touchend',    onTouchEnd,   { passive: false });
+}
 
 document.addEventListener('keydown', e => {
   if (e.code === 'Space') { e.preventDefault(); swapBubbles(); }
