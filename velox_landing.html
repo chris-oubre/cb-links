@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velox — Referral Intelligence for Specialist Practices</title>
+<meta name="description" content="Velox is a deterministic, guideline-driven clinical decision support platform that helps specialist practices triage referrals faster, surface high-risk patients, and reduce time to treatment.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Variables ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:    #0A1628;
+  --ink:     #0D1E35;
+  --blue:    #1A4B7A;
+  --sky:     #2E7EC5;
+  --gold:    #C49A28;
+  --gold-lt: #E8C96A;
+  --white:   #FFFFFF;
+  --offwht:  #F4F1EB;
+  --muted:   #8A97A8;
+  --rule:    rgba(255,255,255,.1);
+  --fs-xl:   clamp(42px, 7vw, 88px);
+  --fs-lg:   clamp(28px, 4vw, 46px);
+  --fs-md:   clamp(18px, 2.5vw, 24px);
+  --fs-sm:   15px;
+  --fs-xs:   12px;
+}
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--navy);
+  color: var(--white);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+
+/* ── Grain texture overlay ─────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; opacity: .6;
+}
+.container { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: 0 32px; }
+
+/* ── Nav ───────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 20px 0;
+  transition: background .3s, backdrop-filter .3s;
+}
+nav.scrolled {
+  background: rgba(10,22,40,.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--rule);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.logo {
+  display: flex; align-items: baseline; gap: 10px;
+}
+.logo-word {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 900; letter-spacing: -.02em;
+  color: var(--white);
+}
+.logo-word span { color: var(--gold); }
+.logo-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .18em;
+  color: var(--muted); text-transform: uppercase;
+}
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a {
+  font-size: 14px; font-weight: 400; color: rgba(255,255,255,.65);
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-cta {
+  background: var(--gold); color: var(--navy) !important;
+  font-weight: 500 !important; padding: 9px 22px;
+  border-radius: 3px; font-size: 13px !important;
+  transition: background .2s, transform .15s !important;
+}
+.nav-cta:hover { background: var(--gold-lt) !important; transform: translateY(-1px); }
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 120px 0 80px;
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 60% 40%, rgba(26,75,122,.25) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(196,154,40,.06) 0%, transparent 60%);
+}
+
+/* ECG line animation */
+.ecg-wrap {
+  position: absolute; bottom: 28%; left: 0; right: 0;
+  height: 80px; overflow: hidden; opacity: .18;
+}
+.ecg-line {
+  position: absolute; top: 0; left: -100%; height: 100%;
+  width: 200%;
+  animation: ecg-scroll 8s linear infinite;
+}
+.ecg-svg { width: 100%; height: 100%; }
+@keyframes ecg-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(50%); }
+}
+
+.hero-content { position: relative; z-index: 1; max-width: 760px; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: var(--fs-xs); letter-spacing: .2em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 28px;
+}
+.hero-eyebrow::before {
+  content: ''; display: block;
+  width: 32px; height: 1px; background: var(--gold);
+}
+.hero-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: var(--fs-xl);
+  font-weight: 900; line-height: 1.05;
+  letter-spacing: -.03em;
+  margin-bottom: 28px;
+}
+.hero-headline em { font-style: italic; color: var(--gold); }
+.hero-sub {
+  font-size: var(--fs-md); font-weight: 300;
+  color: rgba(255,255,255,.7); line-height: 1.65;
+  max-width: 560px; margin-bottom: 44px;
+}
+.hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--gold); color: var(--navy);
+  font-weight: 500; font-size: 15px;
+  padding: 14px 32px; border-radius: 3px;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 4px 24px rgba(196,154,40,.3);
+}
+.btn-primary:hover {
+  background: var(--gold-lt); transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(196,154,40,.4);
+}
+.btn-ghost {
+  font-size: 14px; color: rgba(255,255,255,.6);
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 13px 28px; border-radius: 3px;
+  transition: border-color .2s, color .2s;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,.45); color: var(--white); }
+
+.hero-trust {
+  display: flex; align-items: center; gap: 28px;
+  margin-top: 60px; flex-wrap: wrap;
+}
+.trust-item {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .12em;
+  color: var(--muted); text-transform: uppercase;
+}
+.trust-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold); opacity: .6;
+}
+
+/* ── Fade-in animations ────────────────────────────────────── */
+.fade-in {
+  opacity: 0; transform: translateY(24px);
+  animation: fadein .8s ease forwards;
+}
+.fade-in:nth-child(1) { animation-delay: .1s; }
+.fade-in:nth-child(2) { animation-delay: .25s; }
+.fade-in:nth-child(3) { animation-delay: .4s; }
+.fade-in:nth-child(4) { animation-delay: .55s; }
+.fade-in:nth-child(5) { animation-delay: .7s; }
+@keyframes fadein {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Problem Section ───────────────────────────────────────── */
+.problem {
+  padding: 100px 0;
+  border-top: 1px solid var(--rule);
+}
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .2em;
+  color: var(--gold); text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: var(--fs-lg); font-weight: 700;
+  line-height: 1.2; margin-bottom: 20px;
+}
+.section-title em { font-style: italic; color: var(--gold); }
+.problem-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 60px; align-items: start; margin-top: 56px;
+}
+.problem-copy p {
+  font-size: 16px; font-weight: 300;
+  color: rgba(255,255,255,.7); line-height: 1.8;
+  margin-bottom: 18px;
+}
+.problem-copy p strong { color: var(--white); font-weight: 500; }
+.stat-list { display: flex; flex-direction: column; gap: 28px; }
+.stat-card {
+  border-left: 2px solid var(--gold);
+  padding: 20px 24px;
+  background: rgba(255,255,255,.03);
+  position: relative;
+}
+.stat-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 42px; font-weight: 900;
+  color: var(--gold); line-height: 1; margin-bottom: 6px;
+}
+.stat-label { font-size: 13px; color: rgba(255,255,255,.6); line-height: 1.5; }
+
+/* ── How it works ──────────────────────────────────────────── */
+.how {
+  padding: 100px 0;
+  border-top: 1px solid var(--rule);
+}
+.how-steps {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 2px; margin-top: 56px;
+}
+.step {
+  padding: 36px 28px;
+  background: rgba(255,255,255,.03);
+  position: relative;
+  transition: background .2s;
+}
+.step:hover { background: rgba(255,255,255,.06); }
+.step-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: .14em;
+  color: var(--gold); margin-bottom: 18px;
+  display: block;
+}
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 12px; line-height: 1.3;
+}
+.step-body { font-size: 13px; font-weight: 300; color: rgba(255,255,255,.6); line-height: 1.7; }
+.step-connector {
+  position: absolute; top: 44px; right: -1px; z-index: 1;
+  width: 2px; height: 20px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+}
+.step:last-child .step-connector { display: none; }
+
+/* ── Features ──────────────────────────────────────────────── */
+.features {
+  padding: 100px 0;
+  border-top: 1px solid var(--rule);
+  background: rgba(0,0,0,.2);
+}
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; margin-top: 56px;
+  border: 1px solid var(--rule);
+}
+.feat-card {
+  padding: 40px 32px;
+  background: var(--navy);
+  transition: background .2s;
+}
+.feat-card:hover { background: rgba(26,75,122,.15); }
+.feat-icon {
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(196,154,40,.3);
+  margin-bottom: 22px;
+}
+.feat-icon svg { width: 20px; height: 20px; stroke: var(--gold); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.feat-title {
+  font-size: 16px; font-weight: 500;
+  margin-bottom: 10px;
+}
+.feat-body { font-size: 13px; font-weight: 300; color: rgba(255,255,255,.58); line-height: 1.7; }
+
+/* ── Pathways ──────────────────────────────────────────────── */
+.pathways {
+  padding: 100px 0;
+  border-top: 1px solid var(--rule);
+}
+.pathway-chips {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-top: 40px;
+}
+.pathway-chip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  border: 1px solid rgba(255,255,255,.12);
+  font-size: 13px; font-weight: 400;
+  color: rgba(255,255,255,.8);
+  transition: border-color .2s, background .2s;
+  cursor: default;
+}
+.pathway-chip:hover {
+  border-color: rgba(196,154,40,.4);
+  background: rgba(196,154,40,.06);
+}
+.pathway-chip-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold); flex-shrink: 0;
+}
+.pathway-chip-version {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; color: var(--muted); margin-left: 4px;
+}
+.pathway-note {
+  margin-top: 28px; font-size: 13px;
+  font-weight: 300; color: var(--muted);
+  font-style: italic;
+}
+
+/* ── Security / Compliance ─────────────────────────────────── */
+.security {
+  padding: 80px 0;
+  border-top: 1px solid var(--rule);
+  background: rgba(0,0,0,.25);
+}
+.security-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 24px; margin-top: 48px;
+}
+.sec-card {
+  padding: 28px 24px;
+  border: 1px solid rgba(255,255,255,.08);
+  text-align: center;
+}
+.sec-card svg { width: 28px; height: 28px; stroke: var(--gold); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; display: inline-block; margin-bottom: 14px; }
+.sec-title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.sec-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+/* ── CTA ───────────────────────────────────────────────────── */
+.cta-section {
+  padding: 100px 0;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(196,154,40,.07) 0%, transparent 70%);
+}
+.cta-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .2em;
+  color: var(--gold); text-transform: uppercase;
+  margin-bottom: 20px; position: relative; z-index: 1;
+}
+.cta-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 56px); font-weight: 900;
+  line-height: 1.1; margin-bottom: 20px;
+  position: relative; z-index: 1;
+}
+.cta-headline em { font-style: italic; color: var(--gold); }
+.cta-sub {
+  font-size: 16px; font-weight: 300;
+  color: rgba(255,255,255,.6); max-width: 480px;
+  margin: 0 auto 40px; line-height: 1.7;
+  position: relative; z-index: 1;
+}
+.cta-form {
+  display: flex; gap: 0; max-width: 420px; margin: 0 auto;
+  position: relative; z-index: 1;
+}
+.cta-input {
+  flex: 1; padding: 14px 18px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.15);
+  border-right: none;
+  color: var(--white); font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color .2s, background .2s;
+}
+.cta-input:focus {
+  background: rgba(255,255,255,.1);
+  border-color: rgba(196,154,40,.5);
+}
+.cta-input::placeholder { color: var(--muted); }
+.cta-submit {
+  background: var(--gold); color: var(--navy);
+  font-weight: 500; font-size: 14px;
+  padding: 14px 24px; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.cta-submit:hover { background: var(--gold-lt); }
+.cta-note {
+  margin-top: 16px; font-size: 12px; color: var(--muted);
+  position: relative; z-index: 1;
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+footer {
+  padding: 48px 0;
+  border-top: 1px solid var(--rule);
+}
+.footer-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px;
+}
+.footer-left { display: flex; flex-direction: column; gap: 6px; }
+.footer-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 900; color: var(--white);
+}
+.footer-logo span { color: var(--gold); }
+.footer-company {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .1em; color: var(--muted);
+  text-transform: uppercase;
+}
+.footer-right { text-align: right; }
+.footer-right p {
+  font-size: 12px; color: var(--muted); line-height: 1.7;
+}
+.footer-right a { color: rgba(255,255,255,.4); transition: color .2s; }
+.footer-right a:hover { color: var(--white); }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .problem-grid { grid-template-columns: 1fr; gap: 40px; }
+  .how-steps { grid-template-columns: 1fr 1fr; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .security-grid { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .footer-inner { flex-direction: column; text-align: center; }
+  .footer-right { text-align: center; }
+}
+@media (max-width: 600px) {
+  .how-steps { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .security-grid { grid-template-columns: 1fr 1fr; }
+  .cta-form { flex-direction: column; }
+  .cta-input { border-right: 1px solid rgba(255,255,255,.15); border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav id="nav">
+  <div class="container nav-inner">
+    <a href="#" class="logo">
+      <span class="logo-word">Vel<span>ox</span></span>
+      <span class="logo-tag">Referral Intelligence</span>
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#features">Features</a>
+      <a href="#pathways">Pathways</a>
+      <a href="#contact" class="nav-cta">Request Access</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+
+  <!-- ECG animated line -->
+  <div class="ecg-wrap">
+    <div class="ecg-line">
+      <svg class="ecg-svg" viewBox="0 0 1200 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <polyline
+          points="0,40 80,40 100,40 115,10 125,70 135,5 148,65 160,40 220,40 280,40 310,40 325,15 335,68 345,8 358,60 368,40 420,40 480,40 510,40 525,15 535,68 545,8 558,60 568,40 620,40 680,40 710,40 725,15 735,68 745,8 758,60 768,40 820,40 880,40 910,40 925,15 935,68 945,8 958,60 968,40 1020,40 1080,40 1110,40 1125,15 1135,68 1145,8 1158,60 1168,40 1200,40"
+          fill="none" stroke="#C49A28" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow fade-in">Clinical Decision Support</div>
+      <h1 class="hero-headline fade-in">
+        The right patient<br>
+        needs to be seen<br>
+        <em>first.</em>
+      </h1>
+      <p class="hero-sub fade-in">
+        Velox reads your EHR at the point of referral, scores every patient against the latest clinical guidelines, and surfaces who needs urgent attention — before they fall through the cracks.
+      </p>
+      <div class="hero-actions fade-in">
+        <a href="#contact" class="btn-primary">Request Early Access</a>
+        <a href="#how-it-works" class="btn-ghost">See How It Works</a>
+      </div>
+      <div class="hero-trust fade-in">
+        <span class="trust-item"><span class="trust-dot"></span>HIPAA-Ready Architecture</span>
+        <span class="trust-item"><span class="trust-dot"></span>No Internet Required</span>
+        <span class="trust-item"><span class="trust-dot"></span>Epic-Compatible</span>
+        <span class="trust-item"><span class="trust-dot"></span>Guideline-Driven</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Problem ── -->
+<section class="problem" id="problem">
+  <div class="container">
+    <div class="section-label">The Problem</div>
+    <h2 class="section-title">High-risk patients are<br><em>hiding in plain sight.</em></h2>
+    <div class="problem-grid">
+      <div class="problem-copy">
+        <p>When a referral arrives at your practice, someone on your team decides how urgently to schedule it. That decision is based on instinct, experience, and whatever made it into the referral note — which is rarely complete.</p>
+        <p><strong>Group E COPD patients with FEV1 below 30%</strong> are sitting in the routine queue. <strong>MASLD patients with FIB-4 above 3.0</strong> are waiting three months. <strong>GAP Stage III IPF</strong> is getting a standard referral appointment.</p>
+        <p>By the time your physician sees the chart, the window for early intervention has often closed. Velox solves this before the visit is ever scheduled.</p>
+      </div>
+      <div class="stat-list">
+        <div class="stat-card">
+          <div class="stat-number">&gt;50%</div>
+          <div class="stat-label">of specialist referrals arrive with incomplete clinical workup data, making accurate triage impossible without additional effort.</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">3×</div>
+          <div class="stat-label">faster appointment scheduling reported by health systems that have deployed automated referral triage platforms.</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">0</div>
+          <div class="stat-label">clinical decision support tools available to specialist support staff at the point of referral intake — until now.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ── -->
+<section class="how" id="how-it-works">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">From referral to<br><em>scheduled priority</em> in seconds.</h2>
+    <div class="how-steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <div class="step-title">Referral Arrives</div>
+        <div class="step-body">A new patient referral enters your practice. Velox reads the associated EHR record automatically — labs, vitals, diagnoses, medications.</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <div class="step-title">Guideline Scoring</div>
+        <div class="step-body">Velox scores the patient against the current clinical guidelines for their pathway — GOLD 2026, AGA 2026, ESC/ERS 2022, GINA 2025, and more.</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <div class="step-title">Decision Trace</div>
+        <div class="step-body">A step-by-step clinical reasoning trace shows your MA exactly how the score was reached — every lab value, every threshold, every decision point.</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step">
+        <span class="step-num">04</span>
+        <div class="step-title">Priority Set</div>
+        <div class="step-body">The patient is assigned a scheduling priority — Routine, Standard, Priority, or Critical — using your clinic's own thresholds, not just the guideline defaults.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-label">Capabilities</div>
+    <h2 class="section-title">Built for the way<br><em>specialist practices actually work.</em></h2>
+    <div class="features-grid">
+
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="feat-title">Deterministic Scoring</div>
+        <div class="feat-body">No black boxes. Every scoring decision is rule-based and traceable. Your MA can read the reasoning. Your physician can trust it. Your attorney can defend it.</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="feat-title">On-Premise Security</div>
+        <div class="feat-body">Velox runs on a local Linux device inside your practice. No PHI leaves the building. No cloud dependency. No internet required for operation.</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+        <div class="feat-title">Clinic Preferences</div>
+        <div class="feat-body">Your thresholds, your rules. Override any guideline default with practice-specific criteria — combinatorial rules, custom priority tiers, order preferences.</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="feat-title">Suggested Orders</div>
+        <div class="feat-body">Velox identifies missing data and surfaces the specific orders needed to complete the workup — before the patient's first visit, not after.</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <div class="feat-title">EHR Integration</div>
+        <div class="feat-body">Reads directly from your existing EHR via FHIR R4 API. Compatible with Epic and major EHR platforms. No manual data entry. No duplicate systems.</div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        </div>
+        <div class="feat-title">Pathway Validation</div>
+        <div class="feat-body">Every scoring pathway is validated against canonical clinical cases before deployment. You can run your own truth tables and add test cases through the UI.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Pathways ── -->
+<section class="pathways" id="pathways">
+  <div class="container">
+    <div class="section-label">Clinical Pathways</div>
+    <h2 class="section-title">Current guidelines.<br><em>Verified logic.</em></h2>
+    <p style="font-size:16px;font-weight:300;color:rgba(255,255,255,.65);max-width:560px;margin-top:16px;line-height:1.7;">
+      Each pathway is built from the primary source guideline, validated against canonical clinical cases, and updated when evidence changes.
+    </p>
+    <div class="pathway-chips">
+      <div class="pathway-chip">
+        <span class="pathway-chip-dot"></span>
+        COPD — ABE Classification
+        <span class="pathway-chip-version">GOLD 2026</span>
+      </div>
+      <div class="pathway-chip">
+        <span class="pathway-chip-dot"></span>
+        MASLD — FIB-4 + NIT
+        <span class="pathway-chip-version">AGA 2026</span>
+      </div>
+      <div class="pathway-chip">
+        <span class="pathway-chip-dot"></span>
+        IPF — GAP Index
+        <span class="pathway-chip-version">ATS/ERS 2022</span>
+      </div>
+      <div class="pathway-chip">
+        <span class="pathway-chip-dot"></span>
+        Pulmonary Hypertension
+        <span class="pathway-chip-version">ESC/ERS 2022</span>
+      </div>
+      <div class="pathway-chip">
+        <span class="pathway-chip-dot"></span>
+        Asthma — GINA Severity
+        <span class="pathway-chip-version">GINA 2025</span>
+      </div>
+      <div class="pathway-chip">
+        <span class="pathway-chip-dot"></span>
+        Refractory Constipation
+        <span class="pathway-chip-version">AGA 2026</span>
+      </div>
+    </div>
+    <p class="pathway-note">Additional pathways in development. Pathway requests from alpha partners are prioritized.</p>
+  </div>
+</section>
+
+<!-- ── Security ── -->
+<section class="security">
+  <div class="container">
+    <div class="section-label">Security & Compliance</div>
+    <h2 class="section-title">Designed for<br><em>healthcare from the ground up.</em></h2>
+    <div class="security-grid">
+      <div class="sec-card">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div class="sec-title">HIPAA-Ready</div>
+        <div class="sec-body">Architecture built for BAA compliance. PHI stays local — never transmitted to external servers.</div>
+      </div>
+      <div class="sec-card">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <div class="sec-title">On-Premise Deployment</div>
+        <div class="sec-body">Self-contained Linux system. No cloud dependency. Operates fully offline after initial setup.</div>
+      </div>
+      <div class="sec-card">
+        <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        <div class="sec-title">Audit Logging</div>
+        <div class="sec-body">Every scoring decision is logged with timestamp and inputs. Complete audit trail for compliance and QI purposes.</div>
+      </div>
+      <div class="sec-card">
+        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <div class="sec-title">Deterministic Output</div>
+        <div class="sec-body">Rule-based logic only. No probabilistic AI. Every output is reproducible and defensible.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section" id="contact">
+  <div class="container">
+    <div class="cta-label">Alpha Access</div>
+    <h2 class="cta-headline">
+      See Velox running<br>on <em>your patients.</em>
+    </h2>
+    <p class="cta-sub">
+      We're partnering with a small number of specialist practices for our alpha program. Reach out to schedule a live demo with your own clinical scenarios.
+    </p>
+    <form class="cta-form" onsubmit="handleSubmit(event)">
+      <input type="email" class="cta-input" placeholder="your@practice.com" id="emailInput" required>
+      <button type="submit" class="cta-submit">Request Access</button>
+    </form>
+    <p class="cta-note" id="formNote">No commitment. We'll reach out within 48 hours to schedule a call.</p>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <div class="footer-logo">Vel<span>ox</span></div>
+        <div class="footer-company">Powered by TMMEC LLC &nbsp;·&nbsp; Louisiana</div>
+      </div>
+      <div class="footer-right">
+        <p>Referral intelligence for specialist practices.</p>
+        <p style="margin-top:6px">
+          <a href="mailto:contact@veloxcds.com">contact@veloxcds.com</a>
+          &nbsp;·&nbsp;
+          <a href="#">Privacy</a>
+          &nbsp;·&nbsp;
+          © 2026 TMMEC LLC. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Sticky nav on scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// Form submission handler
+function handleSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('emailInput').value;
+  const note  = document.getElementById('formNote');
+  note.textContent = "Thank you — we'll be in touch within 48 hours.";
+  note.style.color = '#C49A28';
+  document.getElementById('emailInput').value = '';
+  // In production: POST to your email handler / CRM here
+}
+
+// Subtle scroll-triggered fade for sections
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(el => {
+    if (el.isIntersecting) {
+      el.target.style.opacity = '1';
+      el.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.stat-card, .step, .feat-card, .sec-card, .pathway-chip').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(16px)';
+  el.style.transition = 'opacity .6s ease, transform .6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
