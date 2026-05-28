@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velox — A Guide for Clinicians</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,900;1,400;1,600&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #1A1A24;
+  --navy:    #0D1B35;
+  --blue:    #1A4B7A;
+  --sky:     #2E7EC5;
+  --gold:    #B8892A;
+  --rust:    #8B3A2A;
+  --sage:    #2A6B4A;
+  --paper:   #FAFAF7;
+  --cream:   #F4F1E8;
+  --rule:    #D8D2C2;
+  --muted:   #6B6B7A;
+  --sidenote:#8A8A9A;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 18px; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+@media print {
+  .no-print { display: none; }
+  body { background: white; font-size: 11pt; }
+  .chapter { page-break-before: always; }
+  .cover { page-break-after: always; }
+}
+
+/* ── Cover ── */
+.cover {
+  background: var(--navy);
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 80px 10%;
+  position: relative; overflow: hidden;
+}
+.cover-rule {
+  position: absolute; top: 0; left: 10%; right: 10%;
+  height: 4px;
+  background: linear-gradient(to right, var(--gold), transparent);
+}
+.cover-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: .22em;
+  text-transform: uppercase; color: rgba(255,255,255,.4);
+  margin-bottom: 40px;
+}
+.cover h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(52px, 8vw, 96px);
+  font-weight: 900; line-height: 1.0;
+  color: white; margin-bottom: 8px;
+}
+.cover h1 span { color: var(--gold); }
+.cover-sub {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(20px, 3vw, 30px);
+  font-weight: 400; font-style: italic;
+  color: rgba(255,255,255,.55);
+  margin-bottom: 60px;
+}
+.cover-meta {
+  display: flex; gap: 40px; flex-wrap: wrap;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+.cover-meta-item { }
+.cover-meta-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .2em;
+  text-transform: uppercase; color: rgba(255,255,255,.3);
+  margin-bottom: 4px;
+}
+.cover-meta-value {
+  font-size: 13px; color: rgba(255,255,255,.65);
+}
+
+/* ── Page layout ── */
+.page {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 80px 40px;
+}
+
+/* ── TOC ── */
+.toc { padding: 80px 10%; border-bottom: 1px solid var(--rule); }
+.toc-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 32px;
+}
+.toc-entries { display: flex; flex-direction: column; gap: 0; }
+.toc-entry {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none; color: var(--ink);
+  transition: color .15s;
+}
+.toc-entry:hover { color: var(--blue); }
+.toc-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: var(--gold); flex-shrink: 0; width: 24px;
+}
+.toc-entry-title { font-size: 16px; font-weight: 400; flex: 1; }
+.toc-entry-sub { font-size: 13px; color: var(--muted); font-style: italic; }
+
+/* ── Chapter header ── */
+.chapter-header {
+  padding: 80px 10% 60px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 0;
+}
+.chapter-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 16px; display: block;
+}
+.chapter-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 900; line-height: 1.1;
+  color: var(--navy); margin-bottom: 16px;
+}
+.chapter-title em { font-style: italic; color: var(--gold); }
+.chapter-deck {
+  font-size: 18px; font-weight: 300; font-style: italic;
+  color: var(--muted); max-width: 580px; line-height: 1.6;
+}
+
+/* ── Body copy ── */
+.prose {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 60px 40px;
+}
+.prose p {
+  margin-bottom: 1.4em;
+  font-size: 17px; font-weight: 300; line-height: 1.85;
+}
+.prose p strong { font-weight: 600; color: var(--navy); }
+.prose p em { font-style: italic; }
+
+h2.section-head {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 700;
+  color: var(--navy); margin: 2em 0 .6em;
+  padding-bottom: .4em;
+  border-bottom: 1px solid var(--rule);
+}
+h3.sub-head {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px; font-weight: 600; font-style: italic;
+  color: var(--blue); margin: 1.8em 0 .5em;
+}
+
+/* ── Pull quote ── */
+.pull {
+  margin: 2.5em 0;
+  padding: 24px 32px;
+  border-left: 3px solid var(--gold);
+  background: var(--cream);
+}
+.pull p {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-style: italic;
+  font-weight: 400; color: var(--navy);
+  line-height: 1.5; margin: 0;
+}
+.pull cite {
+  display: block; margin-top: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .12em;
+  color: var(--muted); text-transform: uppercase;
+  font-style: normal;
+}
+
+/* ── Value cards ── */
+.value-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; margin: 2em 0;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+.value-card {
+  background: var(--paper);
+  padding: 28px 24px;
+}
+.value-card-who {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 10px;
+}
+.value-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 600;
+  color: var(--navy); margin-bottom: 8px;
+}
+.value-card-body {
+  font-size: 14px; font-weight: 300;
+  color: var(--muted); line-height: 1.65;
+}
+
+/* ── Vignette ── */
+.vignette {
+  margin: 3em 0;
+  border: 1px solid var(--rule);
+  background: var(--cream);
+  overflow: hidden;
+}
+.vignette-header {
+  background: var(--navy);
+  padding: 16px 28px;
+  display: flex; align-items: center; gap: 14px;
+}
+.vignette-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--gold);
+}
+.vignette-title {
+  font-size: 14px; font-weight: 400; color: rgba(255,255,255,.75);
+}
+.vignette-body { padding: 32px 28px; }
+.vignette-body p {
+  font-size: 16px; font-weight: 300; line-height: 1.8;
+  margin-bottom: 1.2em; color: var(--ink);
+}
+.vignette-body p:last-child { margin-bottom: 0; }
+
+/* ── Velox output box ── */
+.velox-output {
+  margin: 1.5em 0;
+  border: 1.5px solid var(--blue);
+  background: white;
+  padding: 24px 24px 20px;
+}
+.velox-output-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--blue);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.velox-output-label::before {
+  content: ''; display: inline-block;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--blue);
+}
+.velox-output-row {
+  display: flex; gap: 12px; margin-bottom: 8px; align-items: flex-start;
+}
+.velox-output-key {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: var(--muted); flex-shrink: 0; width: 130px;
+  margin-top: 2px;
+}
+.velox-output-val {
+  font-size: 14px; font-weight: 400; line-height: 1.55;
+  color: var(--ink);
+}
+.velox-output-val.urgent { color: var(--rust); font-weight: 600; }
+.velox-output-val.ok     { color: var(--sage); font-weight: 600; }
+.velox-output-val.warn   { color: var(--gold); font-weight: 600; }
+
+/* ── Objective list ── */
+.obj-list { list-style: none; margin: 1.5em 0; display: flex; flex-direction: column; gap: 10px; }
+.obj-list li {
+  display: flex; gap: 14px; align-items: flex-start;
+  font-size: 16px; font-weight: 300; line-height: 1.65;
+}
+.obj-list li::before {
+  content: '→';
+  font-family: 'DM Mono', monospace;
+  color: var(--gold); flex-shrink: 0; margin-top: 2px;
+}
+
+/* ── Section divider ── */
+.divider {
+  margin: 3em 0;
+  display: flex; align-items: center; gap: 16px;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--rule);
+}
+.divider-mark {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; color: var(--muted); letter-spacing: .1em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  .value-grid { grid-template-columns: 1fr; }
+  .prose { padding: 40px 24px; }
+  .chapter-header { padding: 60px 24px 40px; }
+  .toc { padding: 60px 24px; }
+  .cover { padding: 60px 8%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Cover ── -->
+<div class="cover">
+  <div class="cover-rule"></div>
+  <div class="cover-eyebrow">Feature Overview &nbsp;·&nbsp; Clinical Edition</div>
+  <h1>Vel<span>ox</span></h1>
+  <div class="cover-sub">Guideline intelligence for the moments that matter most</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Intended audience</div>
+      <div class="cover-meta-value">Specialist Physicians &amp; Primary Care Providers</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Powered by</div>
+      <div class="cover-meta-value">TMMEC LLC</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Version</div>
+      <div class="cover-meta-value">Alpha — May 2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOC ── -->
+<div class="toc no-print" id="toc">
+  <div class="toc-title">Contents</div>
+  <div class="toc-entries">
+    <a href="#mission" class="toc-entry">
+      <span class="toc-num">—</span>
+      <span>
+        <div class="toc-entry-title">Mission, Vision &amp; Goal</div>
+        <div class="toc-entry-sub">Why we built this and what we're trying to change</div>
+      </span>
+    </a>
+    <a href="#overview" class="toc-entry">
+      <span class="toc-num">—</span>
+      <span>
+        <div class="toc-entry-title">The Four Use Cases</div>
+        <div class="toc-entry-sub">A map of how Velox fits into clinical practice</div>
+      </span>
+    </a>
+    <a href="#ch1" class="toc-entry">
+      <span class="toc-num">01</span>
+      <span>
+        <div class="toc-entry-title">The Specialist's Front Door</div>
+        <div class="toc-entry-sub">Triage, risk stratification, and the high-quality first visit</div>
+      </span>
+    </a>
+    <a href="#ch2" class="toc-entry">
+      <span class="toc-num">02</span>
+      <span>
+        <div class="toc-entry-title">The PCP's Pre-Referral Checklist</div>
+        <div class="toc-entry-sub">Sending the right patient with the right workup</div>
+      </span>
+    </a>
+    <a href="#ch3" class="toc-entry">
+      <span class="toc-num">03</span>
+      <span>
+        <div class="toc-entry-title">The Mid-Visit Moment</div>
+        <div class="toc-entry-sub">Surfacing what the guidelines say while the patient is still in the room</div>
+      </span>
+    </a>
+    <a href="#ch4" class="toc-entry">
+      <span class="toc-num">04</span>
+      <span>
+        <div class="toc-entry-title">Keeping the Right Patients in Primary Care</div>
+        <div class="toc-entry-sub">Guideline-endorsed management plans that don't require a referral</div>
+      </span>
+    </a>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- MISSION -->
+<!-- ════════════════════════════════════════ -->
+<div id="mission">
+<div class="chapter-header">
+  <span class="chapter-num">Foundation</span>
+  <h1 class="chapter-title">Mission, Vision<br><em>&amp; Goal</em></h1>
+  <p class="chapter-deck">Before we talk about what Velox does, let's be honest about the problem it exists to solve.</p>
+</div>
+
+<div class="prose">
+
+<p>Somewhere in your waiting room right now — or in a stack of incoming referrals, or in a chart that hasn't been reviewed yet — there is a patient who needed to be seen sooner. Not because anyone made a mistake. Not because the care wasn't competent. But because the system that connects patients to the right care at the right time was never designed to be fast or precise. It was designed to be <em>manageable.</em></p>
+
+<p>Patients are referred with incomplete workups. Support staff triage by instinct. Specialists see patients who didn't need a specialist. PCPs refer patients who could have been managed in primary care — sometimes because they weren't sure, sometimes because they didn't have the latest guideline top of mind, and sometimes because it was easier than the alternative. High-risk patients wait in the same queue as low-risk ones. Time to treatment stretches from weeks to months.</p>
+
+<p>Velox is built on a simple premise: <strong>the information needed to make better decisions already exists in the medical record.</strong> The latest guidelines already define who needs urgent attention and who doesn't. The gap is not clinical knowledge — it's the time and tools to apply that knowledge to every patient, every time.</p>
+
+<div class="pull">
+  <p>Velox doesn't tell clinicians what to think. It gives them what they need to ask the right question before the patient walks in the door — or before they walk out without the care they needed.</p>
+</div>
+
+<h2 class="section-head">Mission</h2>
+<p>Reduce time to treatment by giving specialist support staff and primary care providers deterministic, guideline-driven clinical decision support — so every referred patient is triaged at the right priority, and every patient encounter benefits from the latest standards of care.</p>
+
+<h2 class="section-head">Vision</h2>
+<p>A clinical world where the pathway from referral to treatment is smooth, transparent, and evidence-aligned — where no high-risk patient waits in a routine queue, no PCP misses a screening that guidelines say they should be doing, and no specialist sees a patient who wasn't ready to be seen.</p>
+
+<h2 class="section-head">Goal</h2>
+<p>Begin with specialist practices in Louisiana — building an alpha program with physicians who are willing to validate the tool against their own patients and their own clinical judgment. Then expand to primary care, extending guideline intelligence to the point where most clinical decisions are actually made: in the PCP's office, before the referral is ever written.</p>
+
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- OVERVIEW -->
+<!-- ════════════════════════════════════════ -->
+<div id="overview">
+<div class="chapter-header">
+  <span class="chapter-num">Overview</span>
+  <h1 class="chapter-title">Four Moments,<br><em>One Tool</em></h1>
+  <p class="chapter-deck">Velox fits into four distinct points in the care journey. Each one solves a different problem for a different person.</p>
+</div>
+
+<div class="prose">
+
+<p>The four use cases aren't separate products. They're the same underlying system — reading the same EHR data, applying the same guidelines — answering different questions depending on who is asking and when.</p>
+
+<div class="value-grid">
+  <div class="value-card">
+    <div class="value-card-who">Chapter 01 · Specialist MA</div>
+    <div class="value-card-title">The Incoming Referral</div>
+    <div class="value-card-body">A new referral arrives. Before anyone picks up the phone, Velox has already scored the patient against the relevant guideline, flagged what's missing, and set a scheduling priority. Your MA knows what to do.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">Chapter 02 · PCP Pre-Referral</div>
+    <div class="value-card-title">Before the Referral Is Written</div>
+    <div class="value-card-body">The PCP is about to send a patient to a specialist. Velox shows them what the specialist will need at the first visit — and whether the patient is ready to go yet.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">Chapter 03 · PCP Mid-Visit</div>
+    <div class="value-card-title">The Patient Is in the Room</div>
+    <div class="value-card-body">During the visit, the PCP notices something worth investigating. Velox surfaces guideline-driven risk patterns hiding in the existing chart data — conditions the patient may not have been evaluated for yet.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">Chapter 04 · PCP Managing</div>
+    <div class="value-card-title">No Referral Needed</div>
+    <div class="value-card-body">The patient scores low risk. The guideline endorses primary care management. Velox generates a specific plan — what to do today, what to monitor, and exactly when a referral would become necessary.</div>
+  </div>
+</div>
+
+<p>Two things run through all four use cases. First, every recommendation is tied to a specific guideline with a specific citation — GOLD 2026 for COPD, AGA 2026 for MASLD, ESC/ERS 2022 for pulmonary hypertension. Velox doesn't express opinions. It applies the guidelines that the relevant specialty societies have already published. Second, every recommendation can be adjusted by your practice. If your thresholds differ from the guideline defaults — and there are good clinical reasons they sometimes should — those preferences are configurable, documented, and yours.</p>
+
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- CHAPTER 1 -->
+<!-- ════════════════════════════════════════ -->
+<div id="ch1" class="chapter">
+<div class="chapter-header">
+  <span class="chapter-num">Chapter 01 · Specialist MA</span>
+  <h1 class="chapter-title">The Specialist's<br><em>Front Door</em></h1>
+  <p class="chapter-deck">Before the specialist sees a single chart, Velox has already read it — and knows what it means.</p>
+</div>
+
+<div class="prose">
+
+<h2 class="section-head">The problem this solves</h2>
+
+<p>When a referral arrives at a specialist practice, someone on the support staff has to decide how urgently to schedule it. That person is typically a medical assistant or care coordinator. They're competent, experienced, and working with what they have — which is usually a referral note, whatever labs made it into the record, and their clinical intuition.</p>
+
+<p>That's not enough. Not because they're not good at their jobs, but because no human being should have to know that a COPD patient with two moderate exacerbations in the past year is categorically different from a COPD patient with one severe exacerbation — and that the GOLD 2026 guidelines classify both as Group E, urgently requiring specialist attention, while a COPD patient with zero exacerbations and a CAT score under 10 is Group A and can wait. That's not clinical intuition. That's guideline literacy that takes years to develop and minutes to apply with the right tool.</p>
+
+<p>What Velox does for the specialist practice is simple: it reads the referral, reads the chart, scores the patient against the current guideline for their condition, and tells the MA what they're looking at — in plain language, with a clear priority, and with a specific list of what's missing before the specialist can give the patient their best first visit.</p>
+
+<h2 class="section-head">What the MA sees</h2>
+
+<p>When a referral comes in, Velox produces three things before anyone has to ask for them. First, a scoring trace — a step-by-step walkthrough of how the patient scored against the guideline, written so that someone without clinical training can follow the reasoning. Not just "high risk" but <em>why:</em> which labs, which history, which thresholds were crossed. Second, a scheduling priority: Routine, Standard, Priority, or Critical. Third, a list of what's missing — the specific labs or measurements that aren't in the record yet but are required for a complete assessment. Those become orders before the patient arrives.</p>
+
+<h2 class="section-head">What the specialist gains</h2>
+
+<p>The specialist's first visit with a referred patient is currently a coin flip. Sometimes the workup is complete and they can act. More often, they spend the first visit figuring out what they need to order before the second visit can be productive. Velox eliminates that problem. By the time the patient walks in, the FIB-4 has been calculated, the spirometry has been done, the missing labs have been collected. The first visit becomes a real clinical encounter instead of a data-gathering exercise.</p>
+
+<div class="pull">
+  <p>Your MA doesn't need to know the GOLD 2026 exacerbation classification system. She needs to know that this patient should be called today, not scheduled in six weeks. Velox tells her that. The guideline explains why.</p>
+</div>
+
+<h2 class="section-head">Value proposition</h2>
+
+<div class="value-grid">
+  <div class="value-card">
+    <div class="value-card-who">For the specialist</div>
+    <div class="value-card-title">Every first visit is a productive one</div>
+    <div class="value-card-body">Workup is complete before the patient arrives. You're making decisions, not placing orders. Your time is spent on the patients who need you most.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the MA</div>
+    <div class="value-card-title">Guideline literacy without years of training</div>
+    <div class="value-card-body">The scoring trace explains the reasoning in plain language. The MA knows why the patient is Priority, not just that they are.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the patient</div>
+    <div class="value-card-title">Urgency recognized, not discovered</div>
+    <div class="value-card-body">High-risk patients are identified at intake, not at the first visit. The window for early intervention stays open.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the practice</div>
+    <div class="value-card-title">A schedule that reflects actual clinical need</div>
+    <div class="value-card-body">Low-complexity patients in appropriate slots. High-priority patients seen this week. No more routine queue for Group E COPD.</div>
+  </div>
+</div>
+
+<h2 class="section-head">In practice: two vignettes</h2>
+
+<div class="vignette">
+  <div class="vignette-header">
+    <span class="vignette-tag">Vignette 01</span>
+    <span class="vignette-title">The COPD referral that almost waited six weeks</span>
+  </div>
+  <div class="vignette-body">
+    <p>A 67-year-old man is referred to pulmonology with a diagnosis of COPD. The referral note says "worsening shortness of breath, requesting evaluation." His chart has a recent spirometry showing FEV1 at 38% predicted, FEV1/FVC of 0.41. His problem list shows two ED visits in the past eight months for COPD exacerbations — one treated with oral steroids outpatient, one requiring a three-day hospitalization.</p>
+
+    <p>Under the old system, this referral goes into the standard queue. The MA reads "COPD, shortness of breath" and schedules him for the next available new patient slot — six weeks out.</p>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Velox Assessment</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Guideline</div>
+        <div class="velox-output-val">GOLD 2026</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Spirometric grade</div>
+        <div class="velox-output-val">GOLD 3 — Severe (FEV1 38%)</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">ABE classification</div>
+        <div class="velox-output-val urgent">Group E — 1 severe + 1 moderate exacerbation</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Scheduling priority</div>
+        <div class="velox-output-val urgent">CRITICAL — contact within 24 hours</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Clinic rule applied</div>
+        <div class="velox-output-val">Frequent exacerbator with severe obstruction → Critical</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Missing before visit</div>
+        <div class="velox-output-val">CBC with differential (eosinophil count for ICS guidance)</div>
+      </div>
+    </div>
+
+    <p>The MA sees Critical. She reads the trace — Group E, one hospitalization, FEV1 below 40%. She calls the patient that afternoon. He's seen within the week. His eosinophil count comes back at 380 cells/µL, and the specialist starts him on an inhaled triple therapy regimen with appropriate ICS guidance. The six-week wait becomes a same-week intervention at a point where it matters.</p>
+  </div>
+</div>
+
+<div class="vignette">
+  <div class="vignette-header">
+    <span class="vignette-tag">Vignette 02</span>
+    <span class="vignette-title">The MASLD referral that was ready — and the one that wasn't</span>
+  </div>
+  <div class="vignette-body">
+    <p>Two MASLD referrals arrive the same morning. Both say "abnormal liver labs, MASLD evaluation requested." Both have elevated ALT. That's where the similarity ends.</p>
+
+    <p>The first patient is a 61-year-old with T2DM. Her chart has a recent CMP: AST 87, ALT 102, platelets 148. Her FIB-4 calculates to 3.84. She doesn't have a FibroScan on record.</p>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Velox Assessment — Patient One</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">FIB-4</div>
+        <div class="velox-output-val urgent">3.842 — above age-adjusted threshold</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Step 2 NIT</div>
+        <div class="velox-output-val warn">VCTE not on record — required before assessment complete</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Routing</div>
+        <div class="velox-output-val warn">Indeterminate — pending Step 2</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Action</div>
+        <div class="velox-output-val">Order FibroScan before scheduling specialist visit</div>
+      </div>
+    </div>
+
+    <p>The second patient is a 55-year-old with elevated ALT at 52 and platelets of 230. His FIB-4 is 0.86 — well below the 1.3 threshold. No Step 2 NIT needed.</p>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Velox Assessment — Patient Two</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">FIB-4</div>
+        <div class="velox-output-val ok">0.862 — below threshold (age &lt; 65, cutoff 1.3)</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Guideline routing</div>
+        <div class="velox-output-val ok">Low risk — advanced fibrosis excluded (NPV ≥ 90%)</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Scheduling priority</div>
+        <div class="velox-output-val ok">Routine</div>
+      </div>
+    </div>
+
+    <p>The MA orders the FibroScan for Patient One. The result comes back: VCTE 14 kPa — above the 8 kPa threshold. Patient One is now definitively high risk per AGA 2026 and gets a Priority slot. Patient Two gets a routine appointment. Both patients are seen at the right time, for the right reason, with the right workup in hand.</p>
+  </div>
+</div>
+
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- CHAPTER 2 -->
+<!-- ════════════════════════════════════════ -->
+<div id="ch2" class="chapter">
+<div class="chapter-header">
+  <span class="chapter-num">Chapter 02 · PCP Pre-Referral</span>
+  <h1 class="chapter-title">Before the Referral<br><em>Is Written</em></h1>
+  <p class="chapter-deck">The best time to complete a workup isn't after the specialist asks for it. It's before the patient leaves the PCP's office.</p>
+</div>
+
+<div class="prose">
+
+<h2 class="section-head">The problem this solves</h2>
+
+<p>When a PCP refers a patient to a specialist, they're making a judgment call: this patient needs more than I can give them. That call is usually right. What's often incomplete is the preparation that should accompany it. The specialist receives the referral, reviews the chart, and realizes that the FIB-4 was never calculated, or the spirometry is three years old, or the echocardiogram was done at another facility and never made it into the record. The first specialist visit becomes a triage visit — figure out what's needed, order it, and schedule a real assessment in six more weeks.</p>
+
+<p>Velox gives the PCP a pre-referral checklist that isn't a generic form — it's the specific workup the target specialist will need, derived from the guideline for that condition, applied to this specific patient's existing chart data. If the FIB-4 can already be calculated from labs that are already in the record, Velox calculates it and shows the PCP where their patient stands before the referral is written. If it can't be calculated because a lab is missing, the PCP knows what to order before the patient leaves today.</p>
+
+<h2 class="section-head">Two ways to use it</h2>
+
+<p>PCPs will use this tool in two different modes, and both matter. In the first mode, the PCP knows which specialty they're referring to. Their patient has MASLD features and they're sending her to hepatology. Velox evaluates the patient against the MASLD pathway specifically and shows exactly what the hepatologist will need. Targeted, specific, actionable.</p>
+
+<p>In the second mode, the presentation is non-specific. The patient has persistent abdominal discomfort, a history of T2DM, mildly elevated liver enzymes, and worsening fatigue. The PCP isn't sure whether this is a GI referral, an endocrinology question, or something else. Velox evaluates the patient across all relevant pathways and surfaces what each one would need — letting the PCP and the data together guide the referral decision.</p>
+
+<h2 class="section-head">What changes for the specialist</h2>
+
+<p>When Velox is used in pre-referral mode, the specialist receives a different kind of referral. Not just "MASLD evaluation requested" but a patient who has already had their FIB-4 calculated, already had a FibroScan ordered and resulted, and arrives with a complete AGA 2026 workup ready for interpretation. The first visit becomes what it should be: a clinical encounter where decisions are made, not a data collection exercise where orders are placed.</p>
+
+<div class="pull">
+  <p>The specialist who helped define the referral criteria is now receiving referrals that meet those criteria. That changes the entire character of the relationship between primary care and specialty.</p>
+</div>
+
+<h2 class="section-head">Value proposition</h2>
+
+<div class="value-grid">
+  <div class="value-card">
+    <div class="value-card-who">For the PCP</div>
+    <div class="value-card-title">Send a complete referral the first time</div>
+    <div class="value-card-body">Know what the specialist needs before the patient walks out. Place the orders today. Avoid the "incomplete workup" callback that delays everything by weeks.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the specialist</div>
+    <div class="value-card-title">Receive referrals that are ready</div>
+    <div class="value-card-body">Less time ordering catch-up labs. More time on clinical decision-making. Fewer visits that are really just history and workup repeats.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the patient</div>
+    <div class="value-card-title">One fewer unnecessary visit</div>
+    <div class="value-card-body">The gap between referral and meaningful treatment narrows. Less waiting. Less confusion about why nothing happened at the first appointment.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the system</div>
+    <div class="value-card-title">Specialist capacity used well</div>
+    <div class="value-card-body">Specialist slots filled with patients who are ready to be evaluated. The first-visit triage problem — one of the biggest inefficiencies in specialty care — largely disappears.</div>
+  </div>
+</div>
+
+<div class="vignette">
+  <div class="vignette-header">
+    <span class="vignette-tag">Vignette 03</span>
+    <span class="vignette-title">The referral that turned a second visit into a first treatment</span>
+  </div>
+  <div class="vignette-body">
+    <p>A PCP is seeing a 64-year-old woman with T2DM, obesity, and a recent CMP showing AST 74, ALT 88, platelets 162. She's been meaning to refer this patient to hepatology for months. Today she finally has time to do it.</p>
+
+    <p>She runs the patient through Velox before writing the referral. The FIB-4 calculates immediately from labs already in the chart: 2.87. Age 64, so the age-adjusted cutoff is 1.3 — she's well above it. The AGA 2026 pathway is clear: FIB-4 above threshold requires Step 2 NIT before the specialist can give a meaningful assessment. No FibroScan is on record.</p>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Velox Pre-Referral Checklist — Hepatology / MASLD</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">FIB-4</div>
+        <div class="velox-output-val warn">2.872 — above threshold, Step 2 NIT required (AGA 2026)</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Ready to refer?</div>
+        <div class="velox-output-val warn">Not yet — FibroScan needed before specialist can assess</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Order today</div>
+        <div class="velox-output-val">VCTE (FibroScan) — preferred Step 2 per AGA 2026</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Once resulted</div>
+        <div class="velox-output-val">If VCTE ≥ 8 kPa → refer hepatology with complete workup</div>
+      </div>
+    </div>
+
+    <p>The PCP orders the FibroScan before writing the referral. The result comes back two weeks later: VCTE 11.4 kPa. She writes the referral now — with the FibroScan result attached and a note that reads "FIB-4 2.87, VCTE 11.4 kPa, AGA 2026 high risk, ready for hepatology assessment."</p>
+
+    <p>The hepatologist receives this referral and schedules it as Priority. At the first visit, she reviews the complete workup, confirms high-risk MASLD with likely F2-F3 fibrosis, and initiates a discussion about resmetirom. The first visit is a treatment visit. Nothing is ordered. Nothing is delayed. The patient, who has been sitting on this diagnosis for months, has a plan the same day she meets her specialist.</p>
+  </div>
+</div>
+
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- CHAPTER 3 -->
+<!-- ════════════════════════════════════════ -->
+<div id="ch3" class="chapter">
+<div class="chapter-header">
+  <span class="chapter-num">Chapter 03 · PCP Mid-Visit</span>
+  <h1 class="chapter-title">The Mid-Visit<br><em>Moment</em></h1>
+  <p class="chapter-deck">The patient is in the room. The chart has information in it that no one has connected yet. Velox connects it.</p>
+</div>
+
+<div class="prose">
+
+<h2 class="section-head">The problem this solves</h2>
+
+<p>A PCP sees hundreds of patients. They cannot maintain encyclopedic recall of every guideline update for every condition they might encounter on any given day. They're also seeing patients for one reason — a diabetes follow-up, a hypertension check, a well visit — while that same patient's chart contains signals for a condition that hasn't been discussed yet. Nobody is at fault. The information is there. The connection just hasn't been made.</p>
+
+<p>The mid-visit use case is about surfacing those connections in real time. Not after the patient leaves. Not on a quality improvement report next quarter. Now, while the patient is still in the room and something can actually be done about it.</p>
+
+<p>Importantly, this use case does not require a diagnosis. It doesn't ask the PCP to enter ICD codes or make a clinical assessment before it can help. It reads what's already in the chart — labs, vitals, medications, problem list, demographics — and identifies whether any guideline-defined risk pattern is present that the PCP should know about. The physician still makes every clinical decision. Velox just makes sure they have the relevant information before the visit ends.</p>
+
+<h2 class="section-head">What this looks like</h2>
+
+<p>The PCP opens Velox during or just before the visit and runs a broad scan. In seconds, the tool surfaces any pathway where the patient's existing data matches guideline-defined risk criteria — not because they have a diagnosis, but because the objective numbers in their chart meet a threshold that the guideline says warrants evaluation. Each finding comes with the specific data that triggered it, the guideline that defines the threshold, and a clear statement of what the next step would be.</p>
+
+<p>This isn't a list of everything that could theoretically be wrong. It's a short, specific, justified list of things the patient's own data suggests should be looked at — with citations, not opinions.</p>
+
+<div class="pull">
+  <p>The PCP doesn't need to remember that T2DM patients should be screened for MASLD. Velox remembers it, checks whether the FIB-4 has ever been done, and says something if it hasn't. That's the entire mechanism.</p>
+</div>
+
+<h2 class="section-head">Value proposition</h2>
+
+<div class="value-grid">
+  <div class="value-card">
+    <div class="value-card-who">For the PCP</div>
+    <div class="value-card-title">Guideline recall without the cognitive load</div>
+    <div class="value-card-body">Stop maintaining mental checklists across dozens of guideline updates. Velox does it. You make the clinical decisions. The guidelines just stay current automatically.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the patient</div>
+    <div class="value-card-title">Screening that happens at the right visit</div>
+    <div class="value-card-body">Not next year. Not when someone finally connects the dots. Today, while the patient is already there, already engaged, and the PCP has a few minutes to address something new.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the specialist</div>
+    <div class="value-card-title">Earlier, better-prepared referrals</div>
+    <div class="value-card-body">When the PCP catches something early, the specialist sees it earlier. Earlier disease. More options. Better outcomes.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the system</div>
+    <div class="value-card-title">Guidelines applied to real patients, reliably</div>
+    <div class="value-card-body">The gap between what guidelines recommend and what happens in practice narrows. Standards of care become something that actually happens, not aspirational targets.</div>
+  </div>
+</div>
+
+<div class="vignette">
+  <div class="vignette-header">
+    <span class="vignette-tag">Vignette 04</span>
+    <span class="vignette-title">The diabetes follow-up that became a MASLD catch</span>
+  </div>
+  <div class="vignette-body">
+    <p>A 58-year-old man comes in for his quarterly T2DM follow-up. HbA1c is 7.8 — not well controlled, but no acute issues. BMI is 31. His most recent CMP, drawn three months ago, shows AST 49 and ALT 61. He's been on metformin for six years. The visit is straightforward until the PCP runs Velox as a matter of habit before closing the chart.</p>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Velox Signal — Standards of Care Scan</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Pathway flagged</div>
+        <div class="velox-output-val warn">MASLD — AGA 2026 screening indicated</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Basis</div>
+        <div class="velox-output-val">T2DM (E11.9) + elevated ALT 61 U/L + BMI 31</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Guideline</div>
+        <div class="velox-output-val">AGA 2026: T2DM patients should be screened regardless of BMI. Elevated ALT is an independent trigger.</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">FIB-4 status</div>
+        <div class="velox-output-val warn">Calculable from current labs — has never been done</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Calculated FIB-4</div>
+        <div class="velox-output-val warn">1.94 — above 1.3 threshold, Step 2 NIT indicated</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Suggested action</div>
+        <div class="velox-output-val">Order VCTE (FibroScan) — Step 2 per AGA 2026</div>
+      </div>
+    </div>
+
+    <p>The PCP hadn't been thinking about MASLD. The patient came in for diabetes. But the FIB-4 is right there in the chart data — it just hadn't been assembled. She shares the finding with the patient, explains that his liver enzymes and diabetes history together put him in a group that the gastroenterology society recommends evaluating for liver disease. She orders the FibroScan. The patient is curious, not alarmed.</p>
+
+    <p>The FibroScan comes back two weeks later at 9.2 kPa — right at the AGA 2026 referral threshold. The PCP refers him to hepatology with a complete workup in hand. He gets seen within three weeks. What could have been discovered years from now — or at a point of decompensation — is caught at a stage where treatment options are still broad.</p>
+  </div>
+</div>
+
+<div class="vignette">
+  <div class="vignette-header">
+    <span class="vignette-tag">Vignette 05</span>
+    <span class="vignette-title">The smoker who had never had spirometry</span>
+  </div>
+  <div class="vignette-body">
+    <p>A 54-year-old woman comes in for an annual physical. She's been a smoker for 28 years — currently half a pack a day. She mentions occasional shortness of breath on exertion that she attributes to being "out of shape." Her chart has no spirometry, ever. Her last visit note says "smoking cessation counseled." Her O2 sat today is 96%.</p>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Velox Signal — Standards of Care Scan</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Pathway flagged</div>
+        <div class="velox-output-val warn">COPD — GOLD 2026 screening pattern</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Basis</div>
+        <div class="velox-output-val">28 pack-year smoking history + exertional dyspnea</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Guideline</div>
+        <div class="velox-output-val">GOLD 2026: spirometry recommended in patients over 40 with respiratory symptoms and risk factors. Diagnosis cannot be made without it.</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Spirometry on record</div>
+        <div class="velox-output-val warn">None — cannot assess COPD without post-bronchodilator FEV1/FVC</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Suggested action</div>
+        <div class="velox-output-val">Order pulmonary function tests (PFTs) with bronchodilator response</div>
+      </div>
+    </div>
+
+    <p>The PCP orders spirometry. Results show FEV1/FVC of 0.64 — below the 0.70 threshold — and FEV1 at 71% predicted. GOLD 2 (Moderate) obstruction. The patient, who thought she was just out of shape, has moderate COPD. She starts a long-acting bronchodilator, receives comprehensive smoking cessation support, and begins annual monitoring. She never has an exacerbation requiring hospitalization during the next three years of follow-up. Whether that's the treatment or the earlier detection, neither would have happened without the spirometry that Velox prompted at a routine physical.</p>
+  </div>
+</div>
+
+</div>
+</div>
+
+
+<!-- ════════════════════════════════════════ -->
+<!-- CHAPTER 4 -->
+<!-- ════════════════════════════════════════ -->
+<div id="ch4" class="chapter">
+<div class="chapter-header">
+  <span class="chapter-num">Chapter 04 · PCP Managing</span>
+  <h1 class="chapter-title">Keeping the Right<br>Patients in<br><em>Primary Care</em></h1>
+  <p class="chapter-deck">A referral is not always the answer. Sometimes the guideline says the PCP is exactly the right person for this patient — and gives them a specific plan to prove it.</p>
+</div>
+
+<div class="prose">
+
+<h2 class="section-head">The problem this solves</h2>
+
+<p>Not every patient who gets referred to a specialist needs to be there. This isn't a criticism — it's a systems problem. PCPs refer partly because they're uncertain, and uncertainty is reasonable when guidelines are changing and the workup is incomplete. They also refer because referring is safer than not referring, because patients sometimes expect it, and because the PCP doesn't always have a clear picture of what "managing in primary care" actually looks like for a specific condition at a specific risk level.</p>
+
+<p>The result is specialist schedules full of low-risk patients who could have been managed well in primary care — while high-risk patients wait for slots that should have been available. Every unnecessary referral delays a necessary one.</p>
+
+<p>This use case is about giving PCPs something they currently don't have: a guideline-endorsed, specific, actionable management plan for low-risk patients — complete with what to do today, what to prescribe, what to monitor, how often to recheck, and <em>exactly</em> what would change the answer from "manage in primary care" to "refer now." That last piece is critical. A PCP who knows the precise threshold that triggers a referral is practicing with confidence, not anxiety.</p>
+
+<h2 class="section-head">What the management plan contains</h2>
+
+<p>When Velox scores a patient as low risk and the relevant guideline endorses primary care management, the output isn't just a verdict — it's a complete handoff. The PCP sees: a plain-language summary of why this patient doesn't need a specialist today, the specific lifestyle and pharmacologic interventions the guideline recommends for this risk level, a monitoring plan with a specific reassessment timeline, the exact labs to order at the next visit, and the precise thresholds — in numbers, not generalities — that would trigger a referral on reassessment.</p>
+
+<p>None of this is invented. Every element is drawn from the guideline with a citation attached. The PCP isn't being told what to do by a software tool. They're being given a structured view of what the guideline already says, applied to this specific patient.</p>
+
+<h2 class="section-head">What this means for the specialist</h2>
+
+<p>This is where the tension in the design requires honest discussion. A tool that keeps patients in primary care is, on its face, a tool that reduces specialist volume. That's only a problem if the patients being kept in primary care are ones the specialist should be seeing. They're not. The patients managed in primary care under this model are low risk by guideline definition — patients the specialist would see briefly, confirm the PCP was managing appropriately, and discharge back to primary care anyway. The specialist's schedule fills instead with the high-risk patients who actually need them.</p>
+
+<p>More importantly: the specialist can configure exactly when they want to see a patient, regardless of guideline routing. If a pulmonologist believes every new COPD diagnosis should have at least one specialist visit — even Group A — that preference can be set in Velox. The guidelines define the default. The specialist defines the exceptions. Both are documented and transparent.</p>
+
+<div class="pull">
+  <p>The goal isn't to keep patients away from specialists. It's to make sure that when a patient needs a specialist, they can get one — because the schedule isn't full of patients who didn't.</p>
+</div>
+
+<h2 class="section-head">Value proposition</h2>
+
+<div class="value-grid">
+  <div class="value-card">
+    <div class="value-card-who">For the PCP</div>
+    <div class="value-card-title">Confidence to manage, not just refer</div>
+    <div class="value-card-body">A specific plan with guideline backing. Not just "low risk" but "here's exactly what to do and when to reassess." The PCP is practicing up to the guideline, not below it.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the specialist</div>
+    <div class="value-card-title">A schedule that matches clinical need</div>
+    <div class="value-card-body">Low-risk patients managed well in primary care. High-risk patients seen sooner. The specialist's time used where it creates the most value.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the patient</div>
+    <div class="value-card-title">A plan, not just a verdict</div>
+    <div class="value-card-body">Instead of "we'll monitor it" — a specific monitoring interval, specific orders at the next visit, and a clear explanation of what the numbers mean and what would change them.</div>
+  </div>
+  <div class="value-card">
+    <div class="value-card-who">For the healthcare system</div>
+    <div class="value-card-title">Guideline-concordant primary care at scale</div>
+    <div class="value-card-body">The gap between what guidelines recommend and what happens in practice narrows. Specialist capacity is preserved for the patients who genuinely require it.</div>
+  </div>
+</div>
+
+<div class="vignette">
+  <div class="vignette-header">
+    <span class="vignette-tag">Vignette 06</span>
+    <span class="vignette-title">The MASLD patient who didn't need hepatology — and got a better outcome because of it</span>
+  </div>
+  <div class="vignette-body">
+    <p>A 52-year-old man with T2DM and mildly elevated liver enzymes is referred by his PCP to hepatology. The referral was written out of caution — the ALT has been elevated for two years, the patient has T2DM, and the PCP wasn't sure where the threshold was. Before writing the referral, she runs Velox.</p>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Velox Assessment — MASLD / AGA 2026</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">FIB-4</div>
+        <div class="velox-output-val ok">0.94 — below 1.3 threshold</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Guideline routing</div>
+        <div class="velox-output-val ok">Low risk — advanced fibrosis excluded (NPV ≥ 90%)</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Referral indicated?</div>
+        <div class="velox-output-val ok">Not at this time — primary care management endorsed (AGA 2026)</div>
+      </div>
+    </div>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Primary Care Management Plan — AGA 2026</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Today</div>
+        <div class="velox-output-val">Initiate or optimize GLP-1 agonist (T2DM + obesity). Counsel on 10% weight loss goal for histologic improvement.</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Monitoring</div>
+        <div class="velox-output-val">Repeat FIB-4 in 12 months (T2DM: higher fibrosis progression risk)</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Orders at reassessment</div>
+        <div class="velox-output-val">AST, ALT, Platelets, HbA1c</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">When to refer</div>
+        <div class="velox-output-val warn">FIB-4 ≥ 1.3 on reassessment → order VCTE before referring · VCTE ≥ 8 kPa → refer hepatology · Clinical decompensation → immediate referral</div>
+      </div>
+    </div>
+
+    <p>The PCP doesn't write the referral. She has a specific plan instead. She starts the patient on semaglutide — his HbA1c will benefit and the GLP-1 effect on hepatic steatosis is well established. She counsels him on the weight loss goal and schedules a 12-month reassessment with the specific labs listed. The patient understands what the numbers mean and what would change his trajectory.</p>
+
+    <p>At 12 months, his FIB-4 is 0.76 — lower than a year ago. His HbA1c has improved to 7.1. His weight is down 14 pounds. The referral never happens. The hepatology slot stays available for someone who actually needs it. And this patient is better managed in primary care than he would have been with a specialist visit that would have confirmed low risk and sent him back anyway.</p>
+  </div>
+</div>
+
+<div class="vignette">
+  <div class="vignette-header">
+    <span class="vignette-tag">Vignette 07</span>
+    <span class="vignette-title">Group A COPD — a plan that prevents a hospitalization</span>
+  </div>
+  <div class="vignette-body">
+    <p>A 61-year-old retired electrician with a 30-year smoking history is seen by his PCP after recent spirometry confirms COPD: FEV1/FVC 0.66, FEV1 72% predicted. He reports mild exertional dyspnea but no exacerbations. His CAT score is 7. He's on no respiratory medications. The PCP considers referring to pulmonology.</p>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Velox Assessment — COPD / GOLD 2026</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Grade</div>
+        <div class="velox-output-val">GOLD 2 — Moderate (FEV1 72%)</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">ABE group</div>
+        <div class="velox-output-val ok">Group A — 0 exacerbations, low symptom burden (CAT 7)</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Referral indicated?</div>
+        <div class="velox-output-val ok">Not at this time — Group A COPD is primary care manageable per GOLD 2026</div>
+      </div>
+    </div>
+
+    <div class="velox-output">
+      <div class="velox-output-label">Primary Care Management Plan — GOLD 2026</div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Initiate today</div>
+        <div class="velox-output-val">Short-acting bronchodilator (SABA) as needed — GOLD Group A first-line</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Vaccinations</div>
+        <div class="velox-output-val">Influenza (annual), pneumococcal (PCV20), COVID (current), RSV</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Smoking cessation</div>
+        <div class="velox-output-val">Pharmacotherapy + counseling — single most effective intervention</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">Monitoring</div>
+        <div class="velox-output-val">Annual spirometry · CAT score at each visit · Exacerbation history reviewed at each visit</div>
+      </div>
+      <div class="velox-output-row">
+        <div class="velox-output-key">When to refer</div>
+        <div class="velox-output-val warn">Any moderate or severe exacerbation → immediately reassess and consider pulmonology · CAT score ≥ 10 → Group B, consider pulmonology · FEV1 falls below 50% → reassess referral threshold</div>
+      </div>
+    </div>
+
+    <p>The PCP doesn't refer. She starts him on a SABA, prescribes varenicline for smoking cessation — his first real attempt in ten years — and schedules repeat spirometry and CAT score in 12 months. He gets his vaccinations. She explains the exacerbation thresholds in plain language: if he ends up in urgent care or the ER for breathing, she needs to know immediately.</p>
+
+    <p>He quits smoking at six months. At the 12-month visit his FEV1 has not declined — unusual in a new diagnosis, likely because cessation happened early. His CAT score is 6. He remains Group A. He's been managed entirely in primary care for 18 months, is on appropriate therapy, is vaccinated, is off cigarettes, and has never had an exacerbation. The pulmonology slot that would have been used for him — confirming Group A and sending him back — was used instead for a patient with FEV1 at 28% and three hospitalizations in 18 months.</p>
+  </div>
+</div>
+
+</div>
+</div>
+
+<!-- ── Closing ── -->
+<div class="prose" style="padding-top:80px; padding-bottom:80px; border-top:1px solid var(--rule); margin-top:0;">
+
+<h2 class="section-head">A note on what Velox is not</h2>
+
+<p>Velox does not make clinical decisions. It does not diagnose patients. It does not tell physicians what to prescribe. Every output is a structured presentation of what the relevant guideline says, applied to the specific data in the patient's chart, with the source cited. The clinician remains the clinician. The judgment remains theirs.</p>
+
+<p>What Velox changes is the information available at the moment decisions are made. The MA who sees a Critical flag next to a COPD referral still decides to call the patient. The PCP who sees a FIB-4 of 2.87 and a suggestion to order a FibroScan still decides whether to order it. The specialist who receives a complete pre-referral workup still decides how to interpret it. Velox doesn't replace any of those decisions. It makes sure they happen with the right information, at the right time, with the right guideline in hand.</p>
+
+<p>That's a narrow ambition. It's also, in our experience, the thing that matters most.</p>
+
+<div class="divider"><span class="divider-mark">Velox · Powered by TMMEC LLC</span></div>
+
+<p style="font-size:14px; color:var(--muted); text-align:center; font-style:italic;">For inquiries about the alpha program, contact TMMEC LLC. All clinical content reflects published guidelines at the time of writing and is subject to update as guidelines evolve.</p>
+
+</div>
+
+</body>
+</html>
