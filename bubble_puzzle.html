@@ -707,34 +707,32 @@ function updateAimFromClient(clientX, clientY, sourceEl) {
 canvas.addEventListener('mousemove', e => updateAimFromClient(e.clientX, e.clientY, canvas));
 shooterCanvas.addEventListener('mousemove', e => updateAimFromClient(e.clientX, e.clientY, shooterCanvas));
 
-canvas.addEventListener('click', shoot);
-shooterCanvas.addEventListener('click', shoot);
+// iOS fires a synthetic click ~300ms after touchend — suppress it so we don't double-shoot
+let suppressNextClick = false;
+function shootFromClick() {
+  if (suppressNextClick) { suppressNextClick = false; return; }
+  shoot();
+}
+canvas.addEventListener('click', shootFromClick);
+shooterCanvas.addEventListener('click', shootFromClick);
 
 // Touch support for iOS / mobile
-let touchMoved = false;
+function onTouchStart(e) {
+  e.preventDefault();
+  const t = e.touches[0];
+  updateAimFromClient(t.clientX, t.clientY, e.currentTarget);
+}
 
 function onTouchMove(e) {
   e.preventDefault();
-  touchMoved = true;
   const t = e.touches[0];
   updateAimFromClient(t.clientX, t.clientY, e.currentTarget);
 }
 
 function onTouchEnd(e) {
   e.preventDefault();
-  if (!touchMoved) {
-    // Short tap with no drag = shoot
-    shoot();
-  }
-  touchMoved = false;
-}
-
-function onTouchStart(e) {
-  e.preventDefault();
-  touchMoved = false;
-  // Update aim immediately on touch-down so a tap also aims before shooting
-  const t = e.touches[0];
-  updateAimFromClient(t.clientX, t.clientY, e.currentTarget);
+  suppressNextClick = true;  // block the synthetic click iOS fires after touch
+  shoot();
 }
 
 for (const el of [canvas, shooterCanvas]) {
