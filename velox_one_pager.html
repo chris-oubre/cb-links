@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velox — One Page Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #fff;
+    color: #0D1B35;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: letter portrait;
+    margin: 0;
+  }
+
+  @media print {
+    body { margin: 0; }
+  }
+
+  /* ── Single page container ── */
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 0 auto;
+    padding: .45in .55in .4in;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── Header strip ── */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-bottom: .18in;
+    border-bottom: 2.5pt solid #0D1B35;
+    margin-bottom: .22in;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 38pt;
+    font-weight: 900;
+    letter-spacing: -.02em;
+    line-height: 1;
+    color: #0D1B35;
+  }
+  .logo span { color: #B8892A; }
+  .tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 7.5pt;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #6B6B7A;
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  /* ── Mission block ── */
+  .mission-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: .22in;
+    margin-bottom: .24in;
+  }
+  .mvg-card {
+    border-top: 2pt solid #B8892A;
+    padding-top: .12in;
+  }
+  .mvg-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 7pt;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: #B8892A;
+    margin-bottom: .07in;
+    display: block;
+  }
+  .mvg-text {
+    font-size: 8.5pt;
+    font-weight: 400;
+    line-height: 1.55;
+    color: #0D1B35;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 7pt;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: #6B6B7A;
+    border-top: 1pt solid #D8D2C2;
+    padding-top: .1in;
+    margin-bottom: .15in;
+  }
+
+  /* ── Use cases ── */
+  .cases {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .18in;
+    flex: 1;
+  }
+
+  .case {
+    border-left: 3pt solid #0D1B35;
+    padding-left: .14in;
+    display: flex;
+    flex-direction: column;
+    gap: .06in;
+  }
+  .case:nth-child(2) { border-left-color: #1A4B7A; }
+  .case:nth-child(3) { border-left-color: #2E7EC5; }
+  .case:nth-child(4) { border-left-color: #B8892A; }
+
+  .case-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 7pt;
+    letter-spacing: .14em;
+    color: #9A9AAA;
+  }
+  .case-who {
+    font-size: 7.5pt;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #6B6B7A;
+  }
+  .case-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 14pt;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #0D1B35;
+  }
+  .case-body {
+    font-size: 8.5pt;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #2A2A3A;
+  }
+  .case-body strong {
+    font-weight: 600;
+    color: #0D1B35;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: .2in;
+    padding-top: .1in;
+    border-top: 1pt solid #D8D2C2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-left {
+    font-size: 7pt;
+    color: #9A9AAA;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: .06em;
+  }
+  .footer-right {
+    font-size: 7pt;
+    color: #9A9AAA;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: .06em;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">Vel<span>ox</span></div>
+    <div class="tagline">
+      Referral Intelligence · Powered by TMMEC LLC<br>
+      Alpha Program · May 2026
+    </div>
+  </div>
+
+  <!-- Mission / Vision / Goal -->
+  <div class="mission-row">
+    <div class="mvg-card">
+      <span class="mvg-label">Mission</span>
+      <div class="mvg-text">Reduce time to treatment by giving specialist practices and primary care providers deterministic, guideline-driven clinical decision support — so every referred patient is triaged at the right priority, and every patient encounter benefits from the latest standards of care.</div>
+    </div>
+    <div class="mvg-card">
+      <span class="mvg-label">Vision</span>
+      <div class="mvg-text">A clinical world where no high-risk patient waits in a routine queue, no PCP misses a guideline-indicated screening, and no specialist sees a patient who wasn't ready to be seen — because the pathway from referral to treatment is smooth, transparent, and evidence-aligned.</div>
+    </div>
+    <div class="mvg-card">
+      <span class="mvg-label">Goal</span>
+      <div class="mvg-text">Begin with a small number of specialist alpha partners in Louisiana — validating the scoring logic against real patients and real clinical judgment. Then extend to primary care, where most decisions are actually made and where guideline intelligence has the greatest impact on time to treatment.</div>
+    </div>
+  </div>
+
+  <!-- Use cases -->
+  <div class="section-label">The Four Use Cases</div>
+
+  <div class="cases">
+
+    <div class="case">
+      <span class="case-num">01</span>
+      <span class="case-who">Specialist MA · Incoming Referral</span>
+      <div class="case-title">The right patient gets seen first.</div>
+      <div class="case-body">When a referral arrives, Velox reads the chart and scores the patient against the current guideline before anyone picks up the phone. The MA sees a scheduling priority — Routine, Standard, Priority, or Critical — a plain-language explanation of why, and a list of what's missing before the specialist can give the patient their best first visit. <strong>Group E COPD doesn't wait six weeks. High-risk MASLD doesn't blend into the routine queue.</strong> The first visit becomes a clinical encounter, not a data-gathering exercise.</div>
+    </div>
+
+    <div class="case">
+      <span class="case-num">02</span>
+      <span class="case-who">PCP · Before the Referral Is Written</span>
+      <div class="case-title">Send a complete referral the first time.</div>
+      <div class="case-body">Before writing a referral, the PCP runs the patient through Velox against the target specialty. The tool shows what the specialist will need at the first visit — and whether the patient is ready yet. <strong>If the FIB-4 can be calculated from labs already in the chart, it's calculated.</strong> If a FibroScan is needed before the specialist can act, the PCP knows to order it today — not after the patient has already waited three months for an appointment that produces nothing but a follow-up order.</div>
+    </div>
+
+    <div class="case">
+      <span class="case-num">03</span>
+      <span class="case-who">PCP · During the Visit</span>
+      <div class="case-title">What the chart already knows.</div>
+      <div class="case-body">A diabetes follow-up. A routine physical. A hypertension check. While the patient is still in the room, Velox scans the existing chart data and surfaces any guideline-defined risk pattern that hasn't been evaluated yet — no diagnosis code required. <strong>The 58-year-old with T2DM, BMI 31, and ALT 61 who has never had a FIB-4.</strong> The smoker with 28 pack-years and exertional dyspnea who has never had spirometry. No one missed anything. The connection just hadn't been made yet. Now it is, while the patient is still there.</div>
+    </div>
+
+    <div class="case">
+      <span class="case-num">04</span>
+      <span class="case-who">PCP · Managing Without a Referral</span>
+      <div class="case-title">When the guideline says stay.</div>
+      <div class="case-body">Not every low-risk patient needs a specialist. When Velox scores a patient as guideline-manageable in primary care, the output isn't just a verdict — it's a plan. What to do today. What to prescribe. When to recheck. What labs to order at reassessment. <strong>And exactly what number, in what lab, at what visit, would change the answer from "manage here" to "refer now."</strong> The PCP practices with confidence. The specialist's schedule stays clear for the patients who genuinely need them. The patient leaves with a plan, not a shrug.</div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-left">Deterministic · Guideline-Driven · Provider-Aligned · On-Premise · EHR-Integrated</div>
+    <div class="footer-right">TMMEC LLC · Louisiana · Confidential Alpha Materials</div>
+  </div>
+
+</div>
+</body>
+</html>
